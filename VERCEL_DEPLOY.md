@@ -18,9 +18,11 @@ Ce guide explique comment déployer le backend Yooreed Event sur Vercel.
 4. Configurez le projet :
    - **Framework Preset**: Other
    - **Root Directory**: `./` (racine du repository)
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
+   - **Build Command**: (LAISSER VIDE - pas besoin, Vercel compile automatiquement)
+   - **Output Directory**: (LAISSER VIDE)
    - **Install Command**: `npm install`
+   
+   ⚠️ **Important** : Ne configurez PAS de Build Command dans les paramètres Vercel car les fonctions serverless sont compilées automatiquement.
 
 ### 2. Configurer les variables d'environnement
 
@@ -57,7 +59,7 @@ Le fichier `vercel.json` est déjà configuré pour :
 Une fois configuré, Vercel va :
 1. Détecter automatiquement le projet Node.js
 2. Installer les dépendances (`npm install`)
-3. Build le projet (`npm run build`)
+3. Compiler automatiquement le TypeScript pour les fonctions serverless dans `api/`
 4. Déployer l'API
 
 ### 5. Test de l'API
