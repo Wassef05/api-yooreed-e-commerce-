@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import { connectDB } from './config/database.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
@@ -24,6 +25,25 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting
 app.use('/api', apiLimiter);
+
+// Middleware to ensure database connection (for serverless functions)
+app.use('/api', async (_req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    // Not connected, try to connect
+    try {
+      await connectDB();
+    } catch (error: any) {
+      console.error('Database connection error in middleware:', error?.message || error);
+      res.status(503).json({
+        success: false,
+        error: 'Database connection failed',
+        message: 'Unable to connect to database. Please try again.',
+      });
+      return;
+    }
+  }
+  next();
+});
 
 // Health check
 app.get('/api/health', (_req, res) => {
