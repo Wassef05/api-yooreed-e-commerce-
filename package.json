@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "echo 'Build skipped - Vercel handles TypeScript compilation for serverless functions'",
     "start": "node dist/server.js",
     "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit",
