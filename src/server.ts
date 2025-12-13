@@ -56,22 +56,28 @@ app.use((_req, res) => {
 });
 
 // Connect DB and start server
-connectDB()
-  .then(() => {
-    console.log('✅ Database connected successfully');
-    // Start server only if not in production (for local development)
-    if (process.env.NODE_ENV !== 'production') {
-      const PORT = process.env.PORT || 5000;
-      app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-      });
-    }
-  })
-  .catch((error) => {
-    console.error('❌ Database connection failed:', error);
-    process.exit(1);
-  });
+// Only auto-connect and start server in local development
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+  connectDB()
+    .then(() => {
+      console.log('✅ Database connected successfully');
+      // Start server only if not in production (for local development)
+      if (process.env.NODE_ENV !== 'production') {
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => {
+          console.log(`🚀 Server running on port ${PORT}`);
+          console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('❌ Database connection failed:', error);
+      // Only exit in local development, not in serverless environments
+      if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+      }
+    });
+}
 
 // IMPORTANT : In production (Passenger), app.listen() is NOT called
 // Passenger starts the server automatically
