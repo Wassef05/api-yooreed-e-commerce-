@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import { Product } from '../models/Product.js';
 import { AppError } from '../middleware/errorHandler.js';
 
@@ -41,8 +42,8 @@ export const getProducts = async (
 
     // Debug logs
     console.log('📦 getProducts - Query:', JSON.stringify(query));
-    console.log('📦 getProducts - MongoDB connection state:', require('mongoose').connection.readyState);
-    console.log('📦 getProducts - Database name:', require('mongoose').connection.name);
+    console.log('📦 getProducts - MongoDB connection state:', mongoose.connection.readyState);
+    console.log('📦 getProducts - Database name:', mongoose.connection.name);
     
     // Count total before query
     const total = await Product.countDocuments(query);
