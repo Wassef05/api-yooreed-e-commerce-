@@ -29,19 +29,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', apiLimiter);
 
 // Middleware to ensure database connection (for serverless functions)
-app.use('/api', async (_req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
+// Note: This is a backup check. The main connection should be handled in api/index.ts for Vercel
+app.use('/api', async (req, res, next) => {
+  const connectionState = mongoose.connection.readyState;
+  console.log(`🔍 API request to ${req.path}, DB state: ${connectionState}`);
+  
+  if (connectionState !== 1) {
     // Not connected, try to connect
+    console.log('⚠️ Database not connected, attempting connection...');
     try {
       await connectDB();
+      console.log('✅ Database connection established in middleware');
     } catch (error: any) {
-      console.error('Database connection error in middleware:', error?.message || error);
-      res.status(503).json({
+      console.error('❌ Database connection error in middleware:', error?.message || error);
+      return res.status(503).json({
         success: false,
         error: 'Database connection failed',
         message: 'Unable to connect to database. Please try again.',
       });
-      return;
     }
   }
   next();
