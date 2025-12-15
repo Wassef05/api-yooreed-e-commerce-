@@ -38,6 +38,8 @@ const ensureDbConnection = async (): Promise<void> => {
 
 // Export handler that ensures DB connection before processing requests
 export default async (req: any, res: any) => {
+  console.log(`📥 Incoming request: ${req.method} ${req.url}`);
+  
   try {
     // Ensure database is connected before processing request
     await ensureDbConnection();
@@ -52,10 +54,13 @@ export default async (req: any, res: any) => {
       });
     }
     
+    console.log(`✅ DB connection verified - DB: ${mongoose.connection.name}, State: ${mongoose.connection.readyState}`);
+    
     // Process the request with the Express app
     return app(req, res);
   } catch (error: any) {
     console.error('❌ Failed to connect to database:', error?.message || error);
+    console.error('❌ Error stack:', error?.stack);
     return res.status(503).json({
       success: false,
       error: 'Database connection failed',

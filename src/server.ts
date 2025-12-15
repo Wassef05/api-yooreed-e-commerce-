@@ -12,7 +12,9 @@ import { apiLimiter } from './middleware/rateLimiter.js';
 dotenv.config();
 
 const app = express();
-app.set('trust proxy', 1);
+// Trust proxy for Vercel (and other reverse proxies)
+// This is required for express-rate-limit to work correctly behind a proxy
+app.set('trust proxy', true);
 
 
 // Middleware
@@ -54,7 +56,53 @@ app.use('/api', async (req, res, next) => {
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'OK', message: 'Yooreed Event API is running' });
+  res.json({ 
+    status: 'OK', 
+    message: 'Yooreed Event API is running',
+    mongodb: {
+      state: mongoose.connection.readyState,
+      stateText: ['disconnected', 'connected', 'connecting', 'disconnecting'][mongoose.connection.readyState] || 'unknown',
+      database: mongoose.connection.name,
+      host: mongoose.connection.host,
+    }
+  });
+});
+
+// Database diagnostic endpoint
+app.get('/api/debug/db', async (_req, res) => {
+  try {
+    const { Product } = await import('./models/Product.js');
+    const { Category } = await import('./models/Category.js');
+    
+    const productCount = await Product.countDocuments({});
+    const categoryCount = await Category.countDocuments({});
+    const sampleProducts = await Product.find({}).limit(5).select('nom categorie');
+    
+    res.json({
+      success: true,
+      mongodb: {
+        state: mongoose.connection.readyState,
+        stateText: ['disconnected', 'connected', 'connecting', 'disconnecting'][mongoose.connection.readyState] || 'unknown',
+        database: mongoose.connection.name,
+        host: mongoose.connection.host,
+      },
+      collections: {
+        products: {
+          total: productCount,
+          sample: sampleProducts,
+        },
+        categories: {
+          total: categoryCount,
+        }
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    });
+  }
 });
 
 // Routes

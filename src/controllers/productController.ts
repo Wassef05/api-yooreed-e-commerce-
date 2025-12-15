@@ -39,13 +39,22 @@ export const getProducts = async (
     const sortOptions: any = {};
     sortOptions[sort as string] = order === 'asc' ? 1 : -1;
 
+    // Debug logs
+    console.log('📦 getProducts - Query:', JSON.stringify(query));
+    console.log('📦 getProducts - MongoDB connection state:', require('mongoose').connection.readyState);
+    console.log('📦 getProducts - Database name:', require('mongoose').connection.name);
+    
+    // Count total before query
+    const total = await Product.countDocuments(query);
+    console.log(`📦 getProducts - Total documents found: ${total}`);
+
     const products = await Product.find(query)
       .populate('recommandations', 'nom images prix')
       .sort(sortOptions)
       .skip(skip)
       .limit(limitNum);
 
-    const total = await Product.countDocuments(query);
+    console.log(`📦 getProducts - Products returned: ${products.length}`);
 
     res.json({
       success: true,
@@ -60,6 +69,7 @@ export const getProducts = async (
       },
     });
   } catch (error) {
+    console.error('❌ getProducts error:', error);
     next(error);
   }
 };
