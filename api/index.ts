@@ -36,7 +36,31 @@ const ensureDbConnection = async (): Promise<void> => {
   return connectionPromise;
 };
 
-// Export the app - Vercel will use it directly
-// The connection is handled in the middleware in server.ts
-export default app;
+// Export handler that ensures DB connection before processing requests
+export default async (req: any, res: any) => {
+  try {
+    // Ensure database is connected before processing request
+    await ensureDbConnection();
+    
+    // Verify connection state
+    if (mongoose.connection.readyState !== 1) {
+      console.error('❌ MongoDB connection state is not ready:', mongoose.connection.readyState);
+      return res.status(503).json({
+        success: false,
+        error: 'Database connection not ready',
+        message: 'Unable to connect to database. Please try again.',
+      });
+    }
+    
+    // Process the request with the Express app
+    return app(req, res);
+  } catch (error: any) {
+    console.error('❌ Failed to connect to database:', error?.message || error);
+    return res.status(503).json({
+      success: false,
+      error: 'Database connection failed',
+      message: error?.message || 'Unable to connect to database. Please try again.',
+    });
+  }
+};
 
