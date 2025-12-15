@@ -208,3 +208,6 @@ https://api-yooreed-e-commerce.vercel.app/api/products
 
 Si ça fonctionne, vous verrez la liste des produits en JSON ! 🎉
 
+
+
+
