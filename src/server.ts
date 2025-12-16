@@ -20,7 +20,38 @@ app.set('trust proxy', true);
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://events.yooreed.com.tn/',
+  origin: (origin, callback) => {
+    // List of allowed origins (with and without trailing slash)
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://events.yooreed.com.tn',
+      'https://events.yooreed.com.tn/', // With trailing slash
+      process.env.FRONTEND_URL,
+      process.env.FRONTEND_URL?.replace(/\/$/, ''), // Without trailing slash if provided with
+      process.env.FRONTEND_URL?.replace(/\/$/, '') + '/', // With trailing slash if provided without
+    ].filter(Boolean); // Remove undefined/null values
+
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Normalize origin (remove trailing slash for comparison)
+    const normalizedOrigin = origin.replace(/\/$/, '');
+
+    // Check if origin matches any allowed origin (normalized)
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (!allowed) return false;
+      const normalizedAllowed = allowed.replace(/\/$/, '');
+      return normalizedOrigin === normalizedAllowed;
+    });
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️ CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(compression());
