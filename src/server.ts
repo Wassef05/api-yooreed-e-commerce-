@@ -20,7 +20,7 @@ app.set('trust proxy', true);
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.FRONTEND_URL || 'https://events.yooreed.com.tn/',
   credentials: true,
 }));
 app.use(compression());

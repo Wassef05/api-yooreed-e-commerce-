@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 
 // Use Atlas cluster by default; override with MONGODB_URI if provided
 // Default points to yooreedevent cluster and database
+// IMPORTANT: The database name must be in the URI after the '/' and before the '?'
+// Format: mongodb+srv://user:pass@cluster/database?options
 const MONGODB_URI =
   process.env.MONGODB_URI ||
   'mongodb+srv://wassef:Qbl9pELrqQ0inj49@yooreedevent.l3mmgqh.mongodb.net/yooreedevent?retryWrites=true&w=majority&appName=yooreedevent';
